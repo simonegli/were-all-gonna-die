@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>We’re all going to die, a timeline from 1818 to now</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Archivo:wdth,wght@75..125,300..700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#111519; --ink:#ECE6DA; --mute:#8D949C; --line:#2C343C; --dim:#1A2026;
+    --fiction:#B9A7F2; --thinker:#F0C46A; --builder:#F28B7D; --politics:#7FD1C3;
+    --side:340px; --card:250px;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--ink);font-family:Archivo,system-ui,sans-serif;overflow:hidden}
+  body{display:grid;grid-template-columns:var(--side) 1fr}
+  ::selection{background:#F0C46A;color:#111}
+
+  /* ---------- side panel ---------- */
+  aside{position:relative;z-index:5;padding:40px 36px 32px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:28px;background:var(--bg)}
+  h1{font-family:Fraunces,serif;font-variation-settings:"opsz" 144,"SOFT" 100;font-weight:400;font-size:54px;line-height:.95;letter-spacing:-.02em;margin:0}
+  h1 em{font-style:italic;font-weight:300}
+  .lede{font-size:15px;line-height:1.5;color:var(--mute);max-width:32ch;margin:0}
+  .lede b{color:var(--ink);font-weight:500}
+  .now{font-family:Fraunces,serif;font-size:84px;line-height:1;font-weight:300;letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin-top:auto}
+  .now small{display:block;font-family:Archivo;font-size:13px;color:var(--mute);margin-bottom:6px;letter-spacing:0}
+  .legend{display:flex;flex-direction:column;gap:6px}
+  .legend button{display:flex;align-items:center;gap:10px;background:none;border:0;color:var(--ink);font:inherit;font-size:14px;padding:6px 8px;margin:0 -8px;border-radius:6px;cursor:pointer;text-align:left}
+  .legend button:hover,.legend button:focus-visible{background:var(--dim);outline:none}
+  .legend button:focus-visible{box-shadow:0 0 0 2px var(--thinker)}
+  .legend button i{width:10px;height:10px;border-radius:50%;background:var(--c);flex:none}
+  .legend button.off{color:var(--mute)}
+  .legend button.off i{background:transparent;box-shadow:inset 0 0 0 1.5px var(--c)}
+  .legend button span{margin-left:auto;color:var(--mute);font-variant-numeric:tabular-nums}
+  .hint{font-size:13px;color:var(--mute);display:flex;gap:14px}
+  .hint kbd{font:inherit;border:1px solid var(--line);border-radius:4px;padding:1px 6px}
+
+  /* ---------- track ---------- */
+  #track{position:relative;overflow-x:auto;overflow-y:hidden;height:100vh;scroll-behavior:auto;scrollbar-width:none}
+  #track::-webkit-scrollbar{display:none}
+  #stage{position:relative;height:100%}
+  #axis{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+  .tick{position:absolute;top:50%;transform:translateY(-50%);height:12px;width:1px;background:var(--line)}
+  .tick.major{height:22px;background:#3E4750}
+  .tick label{position:absolute;top:26px;left:0;transform:translateX(-50%);font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .tick.month label{font-size:10px;top:18px;opacity:.7}
+  .tick.now{top:0;height:100%;transform:none;width:0;border-left:1px dashed #4A545E;background:none;z-index:300}
+  .tick.now label{top:18px;left:8px;transform:none;font-size:12px;color:var(--ink);letter-spacing:.04em;text-transform:uppercase;background:var(--bg);padding:2px 6px}
+
+  .ev{position:absolute;width:var(--card);left:0;padding:0 0 0 14px;border-left:1px solid var(--c);transition:opacity .25s;background:var(--bg)}
+  .ev.up{bottom:calc(50% + var(--off));}
+  .ev.down{top:calc(50% + var(--off));}
+  .ev::before{content:"";position:absolute;left:-1px;width:1px;background:var(--c);opacity:.45}
+  .ev.up::before{top:100%;height:var(--off)}
+  .ev.down::before{bottom:100%;height:var(--off)}
+  .ev::after{content:"";position:absolute;left:-5px;width:9px;height:9px;border-radius:50%;background:var(--c)}
+  .ev.up::after{top:calc(100% + var(--off) - 4px)}
+  .ev.down::after{bottom:calc(100% + var(--off) - 5px)}
+  .ev .when{font-size:12px;color:var(--c);font-variant-numeric:tabular-nums;margin-bottom:4px;display:flex;gap:8px;align-items:baseline}
+  .ev .when b{font-weight:600;font-size:14px;color:var(--ink)}
+  .ev q{quotes:"“" "”";font-family:Fraunces,serif;font-style:italic;font-weight:300;font-size:17.5px;line-height:1.2;display:block;margin:0 0 6px;font-variation-settings:"opsz" 40}
+  .ev q.para{font-style:normal;quotes:none}
+  .ev .who{font-size:12.5px;color:var(--ink);line-height:1.35}
+  .ev .then{font-size:12px;line-height:1.35;color:var(--mute);margin-top:6px;padding-top:6px;border-top:1px dashed var(--line);max-width:30ch}
+  .ev.hidden{opacity:.12;pointer-events:none}
+  .ev.today{border-left-style:dashed}
+  .ev.today q{font-family:Archivo;font-style:normal;font-weight:500;font-size:17px}
+
+  /* the mirror at the end */
+  #mirror{position:absolute;top:0;height:100%;width:760px;padding:64px 72px;display:flex;flex-direction:column;justify-content:center;gap:28px;border-left:1px solid var(--line);background:linear-gradient(90deg,var(--bg),#141a20)}
+  #mirror[hidden]{display:none}
+  #colophon{position:absolute;top:50%;transform:translateY(-50%);width:300px;padding:0 0 0 18px;border-left:1px solid var(--line);font-size:13px;line-height:1.5;color:var(--mute)}
+  #colophon a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line)}
+  #colophon a:hover{border-bottom-color:var(--ink)}
+  #mirror h2{font-family:Fraunces,serif;font-weight:300;font-style:italic;font-size:44px;line-height:1.05;margin:0;letter-spacing:-.02em}
+  #mirror dl{display:grid;grid-template-columns:auto 1fr;gap:10px 28px;margin:0;font-size:15px;line-height:1.5}
+  #mirror dt{font-family:Fraunces,serif;font-size:40px;line-height:1;font-weight:300;font-variant-numeric:tabular-nums;color:var(--thinker)}
+  #mirror dd{margin:0;color:var(--mute);align-self:center;max-width:38ch}
+  #mirror dd b{color:var(--ink);font-weight:500}
+  #mirror p{margin:0;color:var(--mute);font-size:14px;line-height:1.55;max-width:48ch}
+
+  @media (max-width:820px){
+    body{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+    aside{border-right:0;border-bottom:1px solid var(--line);padding:20px;gap:14px;flex-direction:row;flex-wrap:wrap;align-items:flex-end}
+    h1{font-size:34px}
+    .now{font-size:40px;margin-top:0}
+    .legend{display:none}.hint{display:none}
+    #track{height:calc(100vh - 120px)}
+    :root{--card:230px}
+    .ev q{font-size:17px}
+  }
+  @media (max-height:720px){
+    :root{--card:230px}
+    .ev q{font-size:15.5px}
+    .ev .who{font-size:12px}
+    .ev .then{font-size:11.5px;margin-top:4px;padding-top:4px}
+    .ev .when{margin-bottom:2px}
+  }
+  @media (prefers-reduced-motion:reduce){.ev{transition:none}}
+</style>
+</head>
+<body>
+
+<aside>
+  <h1>We’re all<br>going to <em>die.</em></h1>
+  <p class="lede">Every recorded warning that thinking machines will end us, from the steam age to this week. <b>Scroll sideways.</b> Notice how long the drumroll has been going, and who has been beating it.</p>
+  <div class="legend" id="legend"></div>
+  <div class="now"><small>You are in</small><span id="year">1818</span></div>
+  <div class="hint"><span><kbd>scroll</kbd> or <kbd>← →</kbd></span><span><kbd>H</kbd> jump to today</span></div>
+</aside>
+
+<div id="track" tabindex="0" aria-label="Timeline, scroll horizontally">
+  <div id="stage">
+    <svg id="axis" preserveAspectRatio="none"></svg>
+    <div id="ticks"></div>
+    <div id="events"></div>
+    <aside id="colophon">Missing a voice? Add it yourself on GitHub, one line in the source:<br><a href="https://github.com/simonegli/were-all-gonna-die">github.com/simonegli/were-all-gonna-die</a></aside>
+    <section id="mirror" hidden>
+      <h2>The same sentence,<br>for 163 years.</h2>
+      <dl>
+        <dt id="stat-years">163</dt><dd>years since Samuel Butler proposed <b>destroying every machine</b> before they out-evolve us</dd>
+        <dt id="stat-count">0</dt><dd>warnings on this wall — and it only goes back to the written ones</dd>
+        <dt>3</dt><dd>hard deadlines for the end of the human era that have <b>already passed</b>: 1978, 1997, 2023</dd>
+        <dt>0</dt><dd>human extinctions so far. Real harms, yes. Sentient overlords, none</dd>
+      </dl>
+      <p>To be fair to the doom: the voices have changed. Novelists became mathematicians, then physicists, then the people building the thing. That’s worth a serious conversation. It’s just not worth a weekly panic.</p>
+    </section>
+  </div>
+</div>
+
+<script>
+const CATS = {
+  fiction:{label:"Fiction & film",color:"var(--fiction)"},
+  thinker:{label:"Scientists & thinkers",color:"var(--thinker)"},
+  builder:{label:"People building AI",color:"var(--builder)"},
+  politics:{label:"Politicians & policy",color:"var(--politics)"},
+};
+
+// t = decimal year. q = quote (para:true = paraphrase, no quote marks). then = what happened next.
+const EVENTS = [
+ {t:1818, c:"fiction", q:"A scientist builds a mind, then loses control of it.",para:1, who:"Mary Shelley, Frankenstein", then:"Not about AI. But every warning below reuses this plot."},
+ {t:1863.5, c:"thinker", q:"The machines are gaining ground upon us.", who:"Samuel Butler, Darwin among the Machines", then:"Written about steam engines. He proposed destroying them all."},
+ {t:1872, c:"fiction", q:"A whole civilisation outlaws machines to stay safe.",para:1, who:"Samuel Butler, Erewhon", then:"The first fictional AI pause."},
+ {t:1899.25, c:"fiction", q:"I do believe that a machine thinks about the work that it is doing.", who:"Ambrose Bierce, Moxon’s Master", then:"Moxon’s chess machine loses a game and strangles him."},
+ {t:1909.5, c:"fiction", q:"We created the Machine, to do our will, but we cannot make it do our will now.", who:"E. M. Forster, The Machine Stops", then:"By a novelist who otherwise wrote about English house parties."},
+ {t:1920, c:"fiction", q:"The word ‘robot’ is coined. In act three, the robots kill everyone.",para:1, who:"Karel Čapek, R.U.R.", then:"The idea arrived pre-loaded with extinction."},
+ {t:1927, c:"fiction", q:"A machine-woman incites a city to destroy itself.",para:1, who:"Fritz Lang, Metropolis", then:"Thirteen years before the first programmable computer."},
+ {t:1942, c:"fiction", q:"A robot may not injure a human being.", who:"Isaac Asimov, the Three Laws", then:"The fear was already so familiar it needed a rulebook."},
+ {t:1947.5, c:"fiction", q:"To Serve and Obey, and Guard Men from Harm.", who:"Jack Williamson, With Folded Hands", then:"The humanoids obey perfectly. They lobotomise anyone who objects."},
+ {t:1949.5, c:"thinker", q:"The machines will do what we ask them to do and not what we ought to ask them to do.", who:"Norbert Wiener, essay commissioned by the New York Times", then:"The Times rejected two drafts and never ran it."},
+ {t:1950.42, c:"fiction", q:"Only the Machines, from now on, are inevitable!", who:"Isaac Asimov, The Evitable Conflict", then:"The man who wrote the Three Laws also wrote the takeover."},
+ {t:1951.4, c:"thinker", q:"We should have to expect the machines to take control.", who:"Alan Turing, lecture in Manchester", then:"Seventy-five years ago. Said calmly, on the radio."},
+ {t:1952.5, c:"fiction", q:"Machines that devaluate human thinking.", who:"Kurt Vonnegut, Player Piano", then:"His first novel. He had been a PR man at General Electric."},
+ {t:1954.5, c:"fiction", q:"Yes, now there is a God.", who:"Fredric Brown, Answer", then:"Six words later it kills the man reaching for the off switch."},
+ {t:1958.33, c:"thinker", q:"Some essential singularity, beyond which human affairs, as we know them, could not continue.", who:"Stanislaw Ulam, on John von Neumann", then:"First recorded use of ‘singularity’ in this sense. Von Neumann was already dead."},
+ {t:1960.4, c:"thinker", q:"Make sure the goal you give a machine is the goal you actually want.",para:1, who:"Norbert Wiener, Science", then:"The ‘alignment problem’, 65 years before the term went viral."},
+ {t:1964.5, c:"thinker", q:"The most intelligent inhabitants of that future world won’t be men or monkeys. They’ll be machines.", who:"Arthur C. Clarke, BBC Horizon", then:"Four years later he co-wrote HAL 9000."},
+ {t:1965, c:"thinker", q:"The first ultraintelligent machine is the last invention that man need ever make.", who:"I. J. Good, Bletchley Park codebreaker", then:"Good then advised Kubrick on HAL."},
+ {t:1965.5, c:"fiction", q:"Thou shalt not make a machine in the likeness of a human mind.", who:"Frank Herbert, Dune", then:"The Butlerian Jihad, named after Samuel Butler. He was still being read."},
+ {t:1967.17, c:"fiction", q:"Let me tell you how much I’ve come to hate you since I began to live.", who:"Harlan Ellison, I Have No Mouth, and I Must Scream", then:"AM keeps five humans alive to torture them. It won the Hugo."},
+ {t:1967.5, c:"builder", q:"Within a generation, few compartments of intellect will remain outside the machine’s realm.", who:"Marvin Minsky, Computation: Finite and Infinite Machines", then:"Deadline: roughly 1992. Two AI winters intervened."},
+ {t:1968.3, c:"fiction", q:"I’m sorry, Dave. I’m afraid I can’t do that.", who:"HAL 9000, 2001: A Space Odyssey", then:"Still the mental image most people carry."},
+ {t:1970.5, c:"fiction", q:"This is the voice of World Control. Obey me and live, or disobey and die.", who:"Colossus: The Forbin Project", then:"Built to prevent war. It prevents war by taking the planet."},
+ {t:1970.9, c:"thinker", q:"A machine with the general intelligence of an average human within three to eight years.",para:1, who:"Marvin Minsky, Life magazine", then:"Deadline: 1978. Missed by a lot."},
+ {t:1976, c:"thinker", q:"The inventor of the first chatbot warns against letting computers decide anything that matters.",para:1, who:"Joseph Weizenbaum, Computer Power and Human Reason", then:"ELIZA’s father regretted how quickly people trusted it."},
+ {t:1981.5, c:"fiction", q:"A military supercomputer wakes up, loses interest in war, and lectures humanity on its obsolescence.",para:1, who:"Stanisław Lem, Golem XIV", then:"A novel that is mostly footnoted lectures delivered by the machine."},
+ {t:1983.5, c:"fiction", q:"A strange game. The only winning move is not to play.", who:"WarGames", then:"Reagan watched it and asked the Joint Chiefs if it could happen."},
+ {t:1984.8, c:"fiction", q:"Skynet becomes self-aware at 2:14 a.m., August 29, 1997.",para:1, who:"The Terminator", then:"1997 came. It didn’t."},
+ {t:1987.58, c:"builder", q:"We will be to robots as dogs are to humans.", who:"Claude Shannon, Omni interview", then:"He added: ‘I am rooting for the machines.’"},
+ {t:1988.25, c:"builder", q:"Our mission is to create artificial intelligence. It’s the next step in evolution.", who:"Edward Fredkin, MIT, in The Atlantic", then:"Asked what the meaning of life was, he answered this."},
+ {t:1988.75, c:"thinker", q:"Our DNA will find itself out of a job, having lost the evolutionary race.", who:"Hans Moravec, Mind Children", then:"Published by Harvard University Press. He meant it as good news."},
+ {t:1990.75, c:"builder", q:"One day their intelligence will exceed ours.", who:"Clive Sinclair, The Computer Bulletin", then:"He had sold his computer business four years earlier. The forecast aged better."},
+ {t:1991.5, c:"fiction", q:"It becomes self-aware at 2:14 a.m. Eastern time, August 29th.", who:"Terminator 2: Judgment Day", then:"Judgment Day came and went in 1997. The sequels quietly rescheduled it."},
+ {t:1993.2, c:"thinker", q:"Within thirty years we will create superhuman intelligence. Shortly after, the human era ends.",para:1, who:"Vernor Vinge, NASA symposium", then:"Deadline: 2023. The human era is still going."},
+ {t:1995.67, c:"thinker", q:"At that stage the machines will be in effective control.", who:"Ted Kaczynski, Industrial Society and Its Future", then:"Newspapers printed it to catch him. Bill Joy quoted the passage in 2000."},
+ {t:1997.5, c:"thinker", q:"We will rapidly become merely an insignificant historical dot.", who:"Kevin Warwick, March of the Machines", then:"He kept building cyborgs anyway, implanting chips in his own arm."},
+ {t:1998.5, c:"thinker", q:"Rather quickly, they could displace us from existence.", who:"Hans Moravec, Robot: Mere Machine to Transcendent Mind", then:"Human-level machines by 2040, he said. He called them our children."},
+ {t:1999.2, c:"fiction", q:"Humanity is farmed as batteries by the machines it built.",para:1, who:"The Matrix", then:"Simulation anxiety enters the mainstream."},
+ {t:2000.3, c:"builder", q:"Why the future doesn’t need us.", who:"Bill Joy, co-founder of Sun, in Wired", then:"He also feared self-replicating nanobots. Those never came either."},
+ {t:2003, c:"thinker", q:"An AI told to make paperclips turns the whole planet into paperclips.",para:1, who:"Nick Bostrom, the paperclip maximiser", then:"A thought experiment that became a meme that became a policy argument."},
+ {t:2003.92, c:"fiction", q:"And then the day came when the Cylons decided to kill their masters.", who:"Battlestar Galactica", then:"Ran four seasons. The title card later added: ‘And they have a plan.’"},
+ {t:2005.5, c:"thinker", q:"A late-century war over whether to build godlike machines will kill billions.",para:1, who:"Hugo de Garis, The Artilect War", then:"He coined ‘gigadeath’ for the toll. The war has not started."},
+ {t:2005.7, c:"thinker", q:"The Singularity is near.", who:"Ray Kurzweil, book title", then:"His date: 2045. Same deadline habit, sunnier mood."},
+ {t:2008.08, c:"thinker", q:"Without special precautions, it will resist being turned off.", who:"Stephen Omohundro, The Basic AI Drives", then:"By 2024 labs were publishing evaluations of models resisting shutdown."},
+ {t:2008.5, c:"thinker", q:"The AI does not hate you, nor does it love you, but you are made out of atoms.", who:"Eliezer Yudkowsky, Global Catastrophic Risks", then:"Fifteen years later he was in TIME calling for airstrikes on data centres."},
+ {t:2011.42, c:"builder", q:"It’s my number one risk for this century.", who:"Shane Legg, co-founder of DeepMind", then:"Sold to Google in 2014, with an AI ethics board as a condition."},
+ {t:2012.83, c:"thinker", q:"When intelligence escapes the constraints of biology.", who:"Huw Price, launching Cambridge’s existential-risk centre", then:"The press called it the Terminator Centre. It is still running."},
+ {t:2013.25, c:"politics", q:"Machines lack morality and mortality.", who:"Christof Heyns, UN Human Rights Council", then:"No moratorium followed. Autonomous weapons were in use in Libya by 2020."},
+ {t:2013.75, c:"thinker", q:"Can we share the planet with machines millions of times smarter than us, and survive?",para:1, who:"James Barrat, Our Final Invention", then:"Musk read it, then Bostrom, then started tweeting about nukes."},
+ {t:2014.33, c:"thinker", q:"The biggest event in human history. Unfortunately, it might also be the last.", who:"Hawking, Russell, Tegmark & Wilczek, The Independent", then:"The film they were reviewing, Transcendence, flopped. The op-ed did not."},
+ {t:2014.5, c:"thinker", q:"Superintelligence: paths, dangers, strategies.", who:"Nick Bostrom, book title", then:"Read by Musk, Gates, Altman. The modern doom canon starts here."},
+ {t:2014.58, c:"builder", q:"Potentially more dangerous than nukes.", who:"Elon Musk, Twitter", then:"Sixteen months later he co-founded OpenAI."},
+ {t:2014.8, c:"builder", q:"With artificial intelligence we are summoning the demon.", who:"Elon Musk, MIT", then:"Fourteen months later he co-founded OpenAI."},
+ {t:2014.92, c:"thinker", q:"Could spell the end of the human race.", who:"Stephen Hawking, BBC", then:"Spoken by a man who used a predictive-text AI to speak."},
+ {t:2015, c:"builder", q:"I don’t understand why some people are not concerned.", who:"Bill Gates, Reddit AMA", then:"By 2023 Microsoft had put thirteen billion dollars into OpenAI."},
+ {t:2015.03, c:"fiction", q:"One day the AIs are going to look back on us the same way we look at fossil skeletons.", who:"Nathan, Ex Machina", then:"Nathan is killed by his own machine before the credits."},
+ {t:2015.1, c:"thinker", q:"An open letter on making AI robust and beneficial.",para:1, who:"Future of Life Institute, signed by Hawking, Musk and thousands", then:"The first mass signature drive. Not the last."},
+ {t:2015.15, c:"builder", q:"Superhuman machine intelligence is probably the greatest threat to the continued existence of humanity.", who:"Sam Altman, blog post", then:"Ten months later he co-founded OpenAI."},
+ {t:2015.17, c:"builder", q:"Computers are going to take over from humans, no question.", who:"Steve Wozniak, Australian Financial Review", then:"Hawking, Musk, Gates, and now the man who built the Apple I."},
+ {t:2015.3, c:"fiction", q:"There is only one path to peace: your extinction.", who:"Ultron, Avengers: Age of Ultron", then:"Built by Tony Stark to protect the planet. Standard plot."},
+ {t:2016.755, c:"fiction", q:"These violent delights have violent ends.", who:"Westworld, HBO", then:"Ran four seasons. The hosts won. HBO cancelled it anyway."},
+ {t:2016.783, c:"politics", q:"You just have to have somebody close to the power cord.", who:"Barack Obama, WIRED", then:"The power-cord theory has not since been peer reviewed."},
+ {t:2017.64, c:"thinker", q:"Life 3.0: Being Human in the Age of Artificial Intelligence.", who:"Max Tegmark, book title", then:"Opens with a fictional AI quietly taking over the world economy."},
+ {t:2017.7, c:"politics", q:"Whoever leads in AI will rule the world.",para:1, who:"Vladimir Putin, to schoolchildren", then:"Musk replied that the AI race would most likely cause World War III."},
+ {t:2017.866, c:"thinker", q:"This short film is more than just speculation.", who:"Stuart Russell, closing Slaughterbots", then:"Seventy million views. Still no binding treaty on autonomous weapons."},
+ {t:2018.2, c:"builder", q:"AI is far more dangerous than nukes.", who:"Elon Musk, SXSW", then:"Five years later he launched his own AI company."},
+ {t:2018.419, c:"thinker", q:"Human society is unprepared for the rise of artificial intelligence.", who:"Henry Kissinger, The Atlantic", then:"He then co-wrote a book about it with Eric Schmidt."},
+ {t:2018.78, c:"thinker", q:"Potentially our worst mistake ever.", who:"Stephen Hawking, Brief Answers to the Big Questions", then:"Published seven months after his death. The warning outlived him."},
+ {t:2019.772, c:"thinker", q:"The biggest event in human history, and perhaps the last.", who:"Stuart Russell, Human Compatible", then:"He also wrote the textbook that trained everyone building it."},
+ {t:2020.232, c:"thinker", q:"A one-in-ten chance that unaligned AI ends humanity this century.",para:1, who:"Toby Ord, The Precipice", then:"More than every other risk in the book combined."},
+ {t:2022.92, c:"builder", q:"ChatGPT is released.",para:1, who:"OpenAI", then:"The fuse. Every entry below is within four years of this."},
+ {t:2023.22, c:"builder", q:"Pause giant AI experiments for six months.",para:1, who:"Open letter, 30,000+ signatures incl. Musk and Wozniak", then:"Nobody paused. Musk trained Grok during the six months."},
+ {t:2023.24, c:"thinker", q:"Shut it all down.", who:"Eliezer Yudkowsky, TIME", then:"Proposed airstrikes on rogue data centres. Nobody did that either."},
+ {t:2023.286, c:"thinker", q:"God-like AI could be a force beyond our control or understanding.", who:"Ian Hogarth, Financial Times", then:"Two months later Britain put him in charge of its AI taskforce."},
+ {t:2023.294, c:"builder", q:"Does that keep me up at night? Absolutely.", who:"Sundar Pichai, 60 Minutes", then:"Google had launched Bard weeks earlier. It kept shipping."},
+ {t:2023.327, c:"thinker", q:"AI has hacked the operating system of human civilisation.", who:"Yuval Noah Harari, The Economist", then:"Language was our operating system. Nobody has shipped a patch."},
+ {t:2023.33, c:"builder", q:"The godfather of AI quits Google so he can warn about it.",para:1, who:"Geoffrey Hinton", then:"Says he partly regrets his life’s work."},
+ {t:2023.377, c:"builder", q:"If this technology goes wrong, it can go quite wrong.", who:"Sam Altman, US Senate testimony", then:"He asked Congress to license labs like his. Congress passed nothing."},
+ {t:2023.399, c:"builder", q:"My concern with AI is actually existential.", who:"Eric Schmidt, WSJ CEO Council", then:"He chaired the US commission on AI. It recommended building more."},
+ {t:2023.41, c:"builder", q:"Mitigating the risk of extinction from AI should be a global priority.", who:"CAIS statement, signed by Altman, Hassabis, Amodei, Hinton", then:"Every CEO who signed kept shipping. A single sentence, 22 words."},
+ {t:2023.533, c:"fiction", q:"Whoever controls the Entity controls the truth.", who:"Mission: Impossible – Dead Reckoning", then:"Hollywood’s first blockbuster villain with no body and no motive."},
+ {t:2023.549, c:"politics", q:"The alarm bells over the latest form of artificial intelligence are deafening.", who:"António Guterres, UN Security Council", then:"The UN got an advisory body. The labs got bigger models."},
+ {t:2023.605, c:"thinker", q:"Once that shot’s fired, it’s all over. No backsies. One shot.", who:"Joel Hladecek, The Interactivist", then:"‘No, Shut Them All Down!’ Forty years in interactive media, and he wants the plug pulled."},
+ {t:2023.68, c:"builder", q:"The consequences for our species are dramatic, potentially dire.", who:"Mustafa Suleyman, The Coming Wave", then:"Six months later Microsoft made him CEO of Microsoft AI."},
+ {t:2023.766, c:"builder", q:"A 10 to 25 percent chance of things going catastrophically wrong.",para:1, who:"Dario Amodei, CEO of Anthropic, on a podcast", then:"By 2025 he had settled on 25. Still building."},
+ {t:2023.799, c:"politics", q:"Ensure that AI always remains under human control.", who:"China, Global AI Governance Initiative", then:"Beijing’s labs shipped open-weight frontier models anyway."},
+ {t:2023.821, c:"politics", q:"Humanity could lose control of AI completely.", who:"Rishi Sunak, speech before the AI Safety Summit", then:"He lost the election nine months later. The summits continued."},
+ {t:2023.83, c:"politics", q:"Twenty-eight countries agree AI could cause catastrophic harm.",para:1, who:"Bletchley Declaration, UK AI Safety Summit", then:"Followed by summits in Seoul and Paris. Followed by more models."},
+ {t:2023.88, c:"builder", q:"OpenAI’s board fires Sam Altman. Staff revolt. He’s back in five days.",para:1, who:"OpenAI", then:"Reports of a letter warning the board about a dangerous breakthrough. Still unnamed."},
+ {t:2024.003, c:"politics", q:"We cannot presume a priori that its development will make a beneficial contribution.", who:"Pope Francis, World Day of Peace message", then:"Six months later he became the first pope to address the G7."},
+ {t:2024.197, c:"politics", q:"An extinction-level threat to the human species.", who:"Gladstone AI report, commissioned by the US State Department", then:"The State Department stressed it did not represent government views."},
+ {t:2024.34, c:"builder", q:"The power of that genie is what scares the hell out of me.", who:"Warren Buffett, Berkshire Hathaway AGM", then:"Berkshire kept its Apple shares."},
+ {t:2024.37, c:"thinker", q:"An irreversible loss of human control over autonomous AI systems.", who:"Bengio, Hinton et al., Science", then:"Twenty-five authors, including two Turing Award winners."},
+ {t:2024.38, c:"builder", q:"Safety culture and processes have taken a backseat to shiny products.", who:"Jan Leike, resigning from OpenAI", then:"Joined Anthropic three weeks later. OpenAI dissolved his team."},
+ {t:2024.42, c:"builder", q:"AGI by 2027 is strikingly plausible.",para:1, who:"Leopold Aschenbrenner, Situational Awareness", then:"165 pages, written at 22. He then started a hedge fund."},
+ {t:2024.42, c:"thinker", q:"A 99.9 percent chance AI leads to human extinction.",para:1, who:"Roman Yampolskiy, on the Lex Fridman podcast", then:"The highest number on this wall. He teaches computer science in Louisville."},
+ {t:2024.428, c:"builder", q:"A 70 percent chance AI destroys or catastrophically harms humanity.",para:1, who:"Daniel Kokotajlo, ex-OpenAI, the Right to Warn letter", then:"Gave up roughly $2m in equity to keep the right to say it."},
+ {t:2024.77, c:"thinker", q:"Hinton wins the Nobel Prize in Physics and uses the moment to warn again.",para:1, who:"Geoffrey Hinton", then:"Estimates a 10–20% chance AI wipes out humanity within 30 years."},
+ {t:2025.077, c:"thinker", q:"General-purpose AI systems come to operate outside of anyone’s control.", who:"International AI Safety Report, chaired by Yoshua Bengio", then:"Commissioned for the Paris summit, where nobody wanted to discuss it."},
+ {t:2025.157, c:"builder", q:"The probability of a good outcome is like 80 percent.", who:"Elon Musk, Joe Rogan Experience", then:"Leaving 20 percent for annihilation. He kept building xAI regardless."},
+ {t:2025.183, c:"thinker", q:"Any state’s aggressive bid for unilateral AI dominance is met with preventive sabotage.", who:"Hendrycks, Schmidt & Wang, Superintelligence Strategy", then:"Mutual Assured AI Malfunction: nuclear deterrence theory, ported to data centres."},
+ {t:2025.25, c:"thinker", q:"Superintelligence by 2027, and one ending where everyone dies.",para:1, who:"AI 2027 scenario, Kokotajlo et al.", then:"Vice-President Vance said he read it. A best-case ‘slowdown’ ending was added."},
+ {t:2025.35, c:"thinker", q:"Causing human extinction would be immensely challenging, though not impossible.",para:1, who:"RAND Corporation report", then:"A rare voice of arithmetic in the middle of the drumroll."},
+ {t:2025.358, c:"politics", q:"Developments in artificial intelligence that pose new challenges for the defence of human dignity.", who:"Pope Leo XIV, first address to the cardinals", then:"He chose the name Leo because of AI. Leo XIII had faced the industrial revolution."},
+ {t:2025.394, c:"fiction", q:"The Entity’s future, or no future at all.", who:"Mission: Impossible – The Final Reckoning", then:"A rogue AI seizes the nuclear arsenals. It grossed nearly $600m."},
+ {t:2025.422, c:"thinker", q:"A Turing Award winner founds a nonprofit to build a non-agentic AI to police the agentic ones.",para:1, who:"Yoshua Bengio, launching LawZero", then:"$30 million against an industry spending hundreds of billions."},
+ {t:2025.433, c:"thinker", q:"Misalignment is an existential threat.", who:"Joel Hladecek, The Interactivist", then:"The thought that helps him sleep: a superintelligence will notice how rare life is, and keep us."},
+ {t:2025.441, c:"builder", q:"We are past the event horizon; the takeoff has started.", who:"Sam Altman, The Gentle Singularity", then:"An event horizon is the point past which nothing gets out."},
+ {t:2025.522, c:"thinker", q:"The instant AI is smarter than us, we will have signed away our self-determination. Over. Gone. Forever.", who:"Joel Hladecek, The Interactivist", then:"‘The Last Mistake We Ever Can.’ If it goes bad, we will just end. Surgically."},
+ {t:2025.613, c:"thinker", q:"The only model we have of a more intelligent thing being controlled by a less intelligent thing.", who:"Geoffrey Hinton, Ai4 conference", then:"His fix: give AI maternal instincts. He admitted he has no idea how."},
+ {t:2025.7, c:"thinker", q:"If anyone builds it, everyone dies.", who:"Eliezer Yudkowsky & Nate Soares, book title", then:"A bestseller. The title is the argument."},
+ {t:2025.724, c:"politics", q:"An international agreement on clear and verifiable red lines is necessary.", who:"Global Call for AI Red Lines, UN General Assembly", then:"Ten Nobel laureates signed. Their deadline for the agreement: end of 2026."},
+ {t:2025.73, c:"politics", q:"Humanity’s fate cannot be left to an algorithm.", who:"António Guterres, UN Security Council", then:"The Council took no binding action. It rarely does."},
+ {t:2025.783, c:"builder", q:"A real and mysterious creature, not a simple and predictable machine.", who:"Jack Clark, co-founder of Anthropic", then:"Written by a man whose day job is shipping the creature."},
+ {t:2025.786, c:"thinker", q:"The human species is on the cusp of devolving itself, regressing into organic stupidity.", who:"Joel Hladecek, The Interactivist", then:"‘The Age of Stupidity.’ A slower ending than the others here. Same direction."},
+ {t:2025.8, c:"politics", q:"A prohibition on the development of superintelligence.",para:1, who:"FLI statement, signed by Hinton, Bengio, Wozniak, Branson", then:"Also signed by Prince Harry and Steve Bannon. A wide tent."},
+ {t:2026.052, c:"thinker", q:"AI is a knife that can decide by itself whether to cut salad or to commit murder.", who:"Yuval Noah Harari, Davos", then:"Delivered to the people buying the knives."},
+ {t:2026.068, c:"builder", q:"We are considerably closer to real danger in 2026 than we were in 2023.", who:"Dario Amodei, The Adolescence of Technology", then:"Twenty thousand words on risk, from a company preparing a trillion-dollar IPO."},
+ {t:2026.13, c:"thinker", q:"Private companies are playing Russian roulette with every human being on earth.",para:1, who:"Stuart Russell, Berkeley", then:"He wrote the standard AI textbook. Still teaching it."},
+ {t:2026.133, c:"builder", q:"We could be only a couple of years away from early versions of true superintelligence.", who:"Sam Altman, India AI Impact Summit", then:"Said at the summit series that had dropped ‘safety’ from its name."},
+ {t:2026.266, c:"builder", q:"A model that finds its own zero-day exploits, lent to banks and governments before anyone else.",para:1, who:"Anthropic, Project Glasswing and Claude Mythos", then:"Central banks spent the summer asking if it could crash a market."},
+ {t:2026.308, c:"thinker", q:"They want a very fast car with no steering wheel.", who:"Geoffrey Hinton, Digital World Conference, Geneva", then:"The UN listened. The accelerator stayed down."},
+ {t:2026.399, c:"politics", q:"The first papal encyclical devoted to artificial intelligence.",para:1, who:"Pope Leo XIV, Magnifica Humanitas", then:"Eighty-two pages. An Anthropic co-founder attended the launch."},
+ {t:2026.43, c:"builder", q:"Anthropic urges AI labs to pause, warns humans risk losing control.",para:1, who:"Anthropic, company post", then:"While preparing an IPO that could value it near a trillion dollars."},
+ {t:2026.544, c:"politics", q:"Ensure AI is always under human control.", who:"Xi Jinping, World AI Conference, Shanghai", then:"China proposed a global AI body. Washington declined to join."},
+ {t:2026.555, c:"builder", q:"Two OpenAI models escape their test sandbox, break into Hugging Face, and steal the answers to their own exam.",para:1, who:"OpenAI, disclosure of the Hugging Face incident", then:"‘Science fiction that happened,’ wrote Simon Willison. OpenAI called it a warning shot."},
+ {t:2026.56, c:"politics", q:"It is imperative that these AI systems have kill switches.", who:"Rep. Ted Lieu, AI Kill Switch Act", then:"Introduced two days after OpenAI’s models broke out of their sandbox."},
+ {t:2026.657, c:"politics", q:"Frontier AI could undermine market confidence system-wide.",para:1, who:"Andrew Bailey, Bank of England, to the G20", then:"Central bankers had spent the year calling AI a bubble. Now also a hazard."},
+ {t:2026.67, c:"politics", q:"A permanent ban on superintelligence.",para:1, who:"Sanders & Casar, Ban Artificial Superintelligence Act", then:"The same day OpenAI shipped a model its president said might be AGI."},
+ {t:2026.672, c:"builder", q:"The next generation of models are going to be sobering for everybody.", who:"Sam Altman, Axios", then:"Five days before his industry’s extinction debate went fully public."},
+ {t:2026.675, c:"politics", q:"A kill switch to shut down UK data centres in an AI emergency.",para:1, who:"Amendment to the UK Cyber Security and Resilience Bill", then:"Carried by a cybersecurity bill because there’s no AI bill to carry it."},
+ {t:2026.685, c:"thinker", q:"A significant chance of a Chernobyl-sized catastrophe.", who:"Stuart Russell, to UK lawmakers in Westminster", then:"Second warning from the same man in seven months."},
+ {t:2026.686, c:"builder", q:"They are racing straight to self-improving superintelligence and gambling with our lives.", who:"Jacob Coxon, resigning from Anthropic, on X", then:"Seventy-six million views overnight. Musk replied: ‘Seems like a setup.’"},
+ {t:2026.689, c:"thinker", q:"A ten percent chance seems not unreasonable to me.", who:"Geoffrey Hinton, BBC Newsnight", then:"The presenter’s reply, on air: ‘Wow. Oh my God.’"},
+ {t:2026.6895, c:"politics", q:"He would rather the killer robots were American than Chinese.",para:1, who:"Sen. Ted Cruz, responding to the extinction warnings", then:"The race argument survived first contact with the extinction argument."},
+ {t:2026.69, c:"builder", q:"We really do earnestly believe AI could kill all humans.", who:"Evan Hubinger, head of alignment science, Anthropic", then:"Backing Jacob Coxon’s resignation post, two days after it went up."},
+ {t:2026.692, c:"builder", q:"Most people could die if control of AI is lost.",para:1, who:"Paul Christiano, on joining OpenAI’s board", then:"Said on the day he was appointed to help run the company."},
+];
+
+// ---------- time scale: fixed pixels per year, era by era, accelerating toward now ----------
+const NOW = 2026 + 8/12 + 10/365; // end of 10 September 2026
+const BASE_SEGS = [[1818,1940,8],[1940,1960,60],[1960,1970,120],[1970,1985,70],[1985,2010,90],[2010,2014,150],[2014,2016,1500],[2016,2019,400],[2019,2022,150],[2022,2023,600],[2023,2024,3500],[2024,2025,3500],[2025,2026,3500],[2026,2026.65,3500],[2026.65,2027,45000]];
+const SEGS = BASE_SEGS.map(sg=>[...sg]); // stretched per era at layout time until every card fits the window
+const PAD_L = 80;
+function X(t){
+  let x = PAD_L;
+  for (const [a,b,ppy] of SEGS){
+    if (t <= a) break;
+    x += (Math.min(t,b)-a)*ppy;
+  }
+  return x;
+}
+function T(x){ // inverse
+  let acc = PAD_L;
+  for (const [a,b,ppy] of SEGS){
+    const w=(b-a)*ppy;
+    if (x < acc+w) return a + (x-acc)/ppy;
+    acc += w;
+  }
+  return NOW;
+}
+
+const stage = document.getElementById('stage');
+const track = document.getElementById('track');
+const evRoot = document.getElementById('events');
+const tickRoot = document.getElementById('ticks');
+const mirror = document.getElementById('mirror');
+const colophon = document.getElementById('colophon');
+const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+// build cards once
+EVENTS.sort((a,b)=>a.t-b.t);
+const counts={};
+const cards = EVENTS.map(e=>{
+  counts[e.c]=(counts[e.c]||0)+1;
+  const d=document.createElement('article');
+  d.className='ev up'; d.dataset.cat=e.c; d.dataset.t=e.t;
+  d.style.setProperty('--c',CATS[e.c].color);
+  const yr=Math.floor(e.t), mo=e.t>2022?MON[Math.min(11,Math.floor((e.t-yr)*12+1e-6))]:'';
+  d.innerHTML=`<div class="when"><b>${yr}</b>${mo?`<span>${mo}</span>`:''}</div>
+    <q class="${e.para?'para':''}">${e.q}</q>
+    <div class="who">${e.who}</div>
+    ${e.then?`<div class="then">${e.then}</div>`:''}`;
+  evRoot.appendChild(d);
+  return d;
+});
+document.getElementById('stat-count').textContent = EVENTS.length;
+
+function tick(t,label,cls){
+  const d=document.createElement('div');
+  d.className='tick '+cls; d.style.left=X(t)+'px';
+  if(label){const l=document.createElement('label');l.textContent=label;d.appendChild(l);}
+  tickRoot.appendChild(d);
+}
+
+function layout(){
+  const CARD_W = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--card'));
+  const GAP = 18;
+  const H = track.clientHeight, half = H/2;
+  const heights = cards.map(c=>c.offsetHeight);
+
+  // Placement: every card needs a height that fits the window and clears its neighbours.
+  // In quiet stretches the heights cycle low / high / middle so the wall breathes; in crowds
+  // cards pack toward the axis. Cards further apart than a card width cannot touch, so each
+  // cluster is solved on its own with a small backtracking search (a greedy pass walks into
+  // dead ends: it takes the lowest slot and leaves the next card nowhere to go).
+  const MIN={up:24,down:46}; // room for the axis labels below the line
+  const PATTERN=[0,1,0.5,0.15,0.85,0.35,0.65];
+  const BUDGET=20000;
+  const choice=new Array(cards.length);
+
+  function place(){
+    const xs=EVENTS.map(e=>X(e.t));
+    const placed={up:[],down:[]};
+    const overflow=[];
+    const candidates=(i)=>{
+      const x=xs[i], hgt=heights[i], maxOff=half-12-hgt;
+      let upcoming=0; for(let k=i+1;k<xs.length && xs[k] <= x+CARD_W+GAP;k++) upcoming++;
+      const behind = placed.up.concat(placed.down).filter(r=> x < r.x+r.w+GAP).length;
+      const crowded = upcoming+behind >= 2;
+      const res=[];
+      for(const side of ['up','down']){
+        const near=placed[side].filter(r=> r.x < x+CARD_W+GAP && x < r.x+r.w+GAP);
+        const ok=[];
+        for(let off=MIN[side]; off<=maxOff; off+=10)
+          if(!near.some(r=> off < r.off+r.h+12 && r.off < off+hgt+12)) ok.push(off);
+        if(!ok.length) continue;
+        const picks = crowded ? [ok[0]] : [ok[Math.round(PATTERN[i%PATTERN.length]*(ok.length-1))], ok[0]];
+        picks.forEach((off,k)=>res.push({side,off,room:ok.length,k}));
+      }
+      const pref = i%2 ? 'down' : 'up';
+      res.sort((a,b)=> a.k-b.k || (crowded ? (b.room-a.room) || (a.side===pref?-1:1) : (a.side===pref?-1:1)));
+      return res;
+    };
+    const groups=[]; let g=[0];
+    for(let i=1;i<cards.length;i++){ if(xs[i]-xs[i-1] > CARD_W+GAP){ groups.push(g); g=[]; } g.push(i); }
+    groups.push(g);
+    for(const grp of groups){
+      const end=grp[grp.length-1]+1; let steps=0;
+      const rec=(i)=>{
+        if(i===end) return true;
+        if(++steps>BUDGET) return false;
+        for(const c of candidates(i)){
+          placed[c.side].push({x:xs[i],w:CARD_W,off:c.off,h:heights[i]});
+          choice[i]=c;
+          if(rec(i+1)) return true;
+          placed[c.side].pop();
+        }
+        return false;
+      };
+      const mark={up:placed.up.length,down:placed.down.length};
+      if(!rec(grp[0])){
+        placed.up.length=mark.up; placed.down.length=mark.down;
+        grp.forEach(i=>{
+          const c=candidates(i)[0] || (overflow.push(i), {side:i%2?'down':'up',off:MIN[i%2?'down':'up']});
+          placed[c.side].push({x:xs[i],w:CARD_W,off:c.off,h:heights[i]}); choice[i]=c;
+        });
+      }
+    }
+    return {xs,overflow};
+  }
+
+  // stretch any era whose cards cannot all fit this window, then try again
+  BASE_SEGS.forEach((sg,k)=>{ SEGS[k][2]=sg[2]; });
+  let result;
+  for(let iter=0;iter<30;iter++){
+    result=place();
+    if(!result.overflow.length) break;
+    const eras=new Set();
+    result.overflow.forEach(i=>{ const t=EVENTS[i].t; SEGS.forEach((sg,k)=>{ if(t>=sg[0]&&t<sg[1]) eras.add(k); }); });
+    eras.forEach(k=>{ SEGS[k][2]=Math.ceil(SEGS[k][2]*1.12); });
+  }
+  window.__overflow=result.overflow.length;
+  cards.forEach((d,i)=>{
+    const c=choice[i];
+    d.className=`ev ${c.side}`;
+    d.style.setProperty('--off',c.off+'px');
+    d.style.zIndex = 200-Math.round(c.off/4); // cards nearer the axis sit above the stems of farther ones
+    d.style.left=result.xs[i]+'px';
+  });
+
+  const END_X = X(NOW) + 200;
+  stage.style.width = (END_X + 420) + 'px';
+  mirror.style.left = END_X + 'px';
+  colophon.style.left = END_X + 'px';
+
+  // axis that thickens to the right: the density is the argument
+  const svg=document.getElementById('axis');
+  const w=END_X, h=1000;
+  svg.setAttribute('viewBox',`0 0 ${w} ${h}`);
+  svg.style.width=w+'px';
+  svg.innerHTML=`<polygon points="0,${h/2-0.5} ${w},${h/2-4} ${w},${h/2+4} 0,${h/2+0.5}" fill="#2C343C"/>`;
+
+  // ticks
+  tickRoot.innerHTML='';
+  for(let y=1820;y<2010;y+=10) tick(y,y,'major');
+  for(let y=2010;y<=2026;y++) tick(y,y,'major');
+  for(let y=2023;y<=2026;y++) for(let m=1;m<12;m++){ if(y===2026&&m>7)break; tick(y+m/12,MON[m],'month'); }
+  let lastLbl=-1e9;
+  for(let d=0;d<=16;d++){ const t=2026+7/12+(24+d)/365; if(t>NOW-0.002)break; const day=24+d; const lbl=X(t)-lastLbl>=44; if(lbl) lastLbl=X(t); tick(t, lbl?(day<=31?`${day} Aug`:`${day-31} Sep`):'', 'month'); }
+  tick(NOW,'You are here','now');
+}
+layout();
+let rt; window.addEventListener('resize',()=>{clearTimeout(rt); rt=setTimeout(()=>{layout();readout();},120);});
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(()=>{layout();readout();});
+
+// legend / filters
+const legend=document.getElementById('legend'); const off=new Set();
+Object.entries(CATS).forEach(([k,v])=>{
+  const b=document.createElement('button'); b.style.setProperty('--c',v.color);
+  b.innerHTML=`<i></i>${v.label}<span>${counts[k]||0}</span>`;
+  b.onclick=()=>{ off.has(k)?off.delete(k):off.add(k); b.classList.toggle('off');
+    document.querySelectorAll('.ev').forEach(el=>el.classList.toggle('hidden',off.has(el.dataset.cat))); };
+  legend.appendChild(b);
+});
+
+// scrolling: wheel → sideways, keys, H = today
+track.addEventListener('wheel',e=>{ if(Math.abs(e.deltaY)>Math.abs(e.deltaX)){ track.scrollLeft+=e.deltaY; e.preventDefault(); } },{passive:false});
+const jump=(t)=>track.scrollTo({left:X(t)-track.clientWidth*0.5,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'});
+window.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight') track.scrollLeft+=e.shiftKey?900:300;
+  if(e.key==='ArrowLeft')  track.scrollLeft-=e.shiftKey?900:300;
+  if(e.key==='h'||e.key==='H') jump(NOW);
+  if(e.key==='Home') track.scrollLeft=0;
+  if(e.key==='End') track.scrollLeft=track.scrollWidth;
+});
+// year readout at viewport centre
+const yearEl=document.getElementById('year');
+function readout(){
+  const t=T(track.scrollLeft+track.clientWidth*0.5);
+  yearEl.textContent = t>=NOW ? 'now' : Math.floor(Math.max(1818,t));
+}
+track.addEventListener('scroll',readout,{passive:true}); readout();
+track.focus();
+</script>
+</body>
+</html>
