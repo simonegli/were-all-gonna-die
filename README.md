@@ -2,7 +2,7 @@
 
 Every recorded warning that thinking machines will end us, from the steam age to this week, on one sideways-scrolling wall.
 
-**Live:** see the Vercel deployment. **Source:** `index.html`, a single file with no build step.
+**Live:** https://timeline-omega-eight.vercel.app · **Source:** `index.html`, a single file with no build step.
 
 ## Add a voice
 
